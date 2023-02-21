@@ -5,7 +5,7 @@ L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_toke
     id: 'mapbox/streets-v11',
     tileSize: 512,
     zoomOffset: -1,
-    accessToken: 'pk.eyJ1Ijoic3FuZ3V5ZW4iLCJhIjoiY2w5eXd1YXc0MDk3MjNucDg2cDhyN3JrbyJ9.aMzoD2AZBPUtaVP2yV5N-A'
+    accessToken: 'pk.eyJ1Ijoic3FuZ3V5ZW4iLCJhIjoiY2w5eXd1YXc0MDk3MjNucDg2cDhyN3JrbyJ9.aMzoD2AZBPUtaVP2yV5N-A',
 }).addTo(map);
 
 var drawnItems = L.featureGroup().addTo(map);
@@ -67,14 +67,44 @@ function setData(e) {
         var enteredUsername = document.getElementById("input_name").value;
         var enteredDescription = document.getElementById("input_desc").value;
 
-        // Print user name and description
-        console.log(enteredUsername);
-        console.log(enteredDescription);
-
-        // Get and print GeoJSON for each drawn layer
+           	// For each drawn layer
         drawnItems.eachLayer(function(layer) {
-            var drawing = JSON.stringify(layer.toGeoJSON().geometry);
-            console.log(drawing);
+           
+        // Create SQL expression to insert layer
+        var drawing = JSON.stringify(layer.toGeoJSON().geometry);
+        var sql =
+            "INSERT INTO YourTableName (geom, name, description) " +
+            "VALUES (ST_SetSRID(ST_GeomFromGeoJSON('" +
+            drawing + "'), 4326), '" +
+            enteredUsername + "', '" +
+            enteredDescription + "');";
+        console.log(sql);
+
+        // Send the data
+        fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: "q=" + encodeURI(sql)
+        })
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(data) {
+            console.log("Data saved:", data);
+        })
+        .catch(function(error) {
+            console.log("Problem saving the data:", error);
+        });
+
+        // Transfer submitted drawing to the tableData layer 
+        //so it persists on the map without you having to refresh the page
+        var newData = layer.toGeoJSON();
+            newData.properties.description = enteredDescription;
+            newData.properties.name = enteredUsername;
+            L.geoJSON(newData, {onEachFeature: addPopup}).addTo(tableData);
+
         });
 
         // Clear drawn items layer
