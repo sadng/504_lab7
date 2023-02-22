@@ -73,7 +73,7 @@ function setData(e) {
         // Create SQL expression to insert layer
         var drawing = JSON.stringify(layer.toGeoJSON().geometry);
         var sql =
-            "INSERT INTO YourTableName (geom, name, description) " +
+            "INSERT INTO sadie_table (geom, name, description) " +
             "VALUES (ST_SetSRID(ST_GeomFromGeoJSON('" +
             drawing + "'), 4326), '" +
             enteredUsername + "', '" +
