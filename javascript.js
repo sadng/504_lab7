@@ -12,7 +12,7 @@ var drawnItems = L.featureGroup().addTo(map);
 
 var tableData = L.layerGroup().addTo(map);
 
-var url = "https://178.128.228.240:4000/sql?q=";
+var url = "https://gisdb.xyz/sql?q=";
 // change the Query below by replacing lab_7_name with your table name
 var sqlQuery = "SELECT geom, description, name FROM sadie_table";
 function addPopup(feature, layer) {
